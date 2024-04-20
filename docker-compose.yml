@@ -1,0 +1,54 @@
+version: '3.7'
+
+services:
+  django:
+    restart: always
+    container_name: dlp_django
+    image: dlp_django
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    env_file:
+      - .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings
+    entrypoint: ['/app/docker/django/entrypoint.sh']
+    expose:
+      - '8000'
+    ports:
+      - '8000:8000'
+
+  tasks_app:
+    container_name: tasks_app
+    image: dlp_django
+    depends_on:
+      - django
+      - db
+    env_file:
+      - .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings
+    entrypoint: ['/app/docker/tasks_app/entrypoint.sh']
+
+  db:
+    image: mysql:8
+    container_name: dlp_db
+    restart: always
+    volumes:
+      - /tmp/app/mysqld:/var/run/mysqld
+      - ./db:/var/lib/mysql
+      - ./init.sql:/app/init.sql
+    command: --init-file /app/init.sql
+    env_file:
+      - .env
+    ports:
+      - '3307:3306'
+    healthcheck:
+      test: ["CMD", "mysql", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}", "-e", "SELECT 1"]
+      timeout: 20s
+      retries: 10
+
+volumes:
+  db:
