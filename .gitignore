@@ -2,3 +2,5 @@
 /.idea/
 /.env
 /.venv/
+
+/aws/credentials
