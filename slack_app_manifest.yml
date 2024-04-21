@@ -1,0 +1,30 @@
+display_information:
+  name: datalossprevention
+features:
+  bot_user:
+    display_name: datalossprevention
+    always_online: false
+oauth_config:
+  scopes:
+    user:
+      - channels:history
+      - files:read
+      - remote_files:read
+      - files:write
+      - chat:write
+      - channels:read
+    bot:
+      - channels:history
+      - channels:read
+      - files:read
+      - im:read
+      - remote_files:read
+      - channels:join
+settings:
+  event_subscriptions:
+    request_url: exposed_url.app/slack/
+    user_events:
+      - message.channels
+  org_deploy_enabled: false
+  socket_mode_enabled: false
+  token_rotation_enabled: false
