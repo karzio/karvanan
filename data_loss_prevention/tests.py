@@ -17,3 +17,7 @@ class PatternTests(TestCase):
 
     def test_is_not_matching_pattern(self):
         assert self.visa_pattern.is_matching("2137") is None
+
+    def test_empty_pattern_is_not_matching(self):
+        assert self.email_pattern.is_matching("") is None
+        assert self.visa_pattern.is_matching("") is None
