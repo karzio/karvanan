@@ -30,10 +30,7 @@ SECRET_KEY = "django-insecure-r(phmm=i=kn#eo#s26p0z_s84w7b#!t(6zesdwn0$5@_qk=m^e
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG") == "true"
 
-ALLOWED_HOSTS = [
-    "265f-2a02-a318-e141-7380-555d-767d-303-d44c.ngrok-free.app",
-    "localhost",
-]
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
 
 # Application definition
@@ -90,10 +87,10 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "mysql.connector.django",
+        "ENGINE": "django.db.backends.mysql",
         "NAME": os.environ.get("MYSQL_DATABASE", default="dlp"),
-        "USER": os.environ.get("MYSQL_USER", default="dlp"),
-        "PASSWORD": os.environ.get("MYSQL_PASSWORD", default="dlp"),
+        "USER": os.environ.get("MYSQL_USER", default="tasks_app"),
+        "PASSWORD": os.environ.get("MYSQL_ROOT_PASSWORD", default="dlp"),
         "HOST": os.environ.get("MYSQL_HOST", default="localhost"),
         "PORT": int(os.environ.get("MYSQL_PORT", default="3306")),
     }

@@ -1,39 +1,31 @@
-# Stage 1: Base with dependencies
-ARG PYTHON_VERSION=3.12
-ARG BASE_IMAGE=base
+FROM python:3.12
 
-FROM python:${PYTHON_VERSION}
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
-RUN apt update && \
-    apt install -y python3-dev default-libmysqlclient-dev build-essential pkg-config
+# Set work directory
+WORKDIR /code
 
-ARG POETRY_VERSION=1.4.2
+# Install dependencies
+COPY requirements.txt /code/
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Create a Python virtual environment for Poetry and install it
-RUN python3 -m venv .venv && \
-    pip install --upgrade pip && \
-    pip install poetry==${POETRY_VERSION}
+# Copy project files
+COPY . /code/
 
-COPY pyproject.toml poetry.lock ./
-RUN poetry install --no-interaction --no-ansi
+ENV USER temp
 
-ENV PATH="/app/.venv/bin:$PATH"
+# create user
+RUN useradd -ms /bin/bash ${USER}
+USER ${USER}
+WORKDIR /home/${USER}
 
-WORKDIR /app
+# add aws credentials
+RUN mkdir -p /home/${USER}/.aws
+COPY aws/credentials /home/${USER}/.aws/credentials
+COPY aws/config /home/${USER}/.aws/config
 
-# Install dependencies including Django
-RUN poetry install --no-interaction --no-ansi
+WORKDIR /code
 
-# Activate virtual environment and set PYTHONPATH
-ENV VIRTUAL_ENV=/app/.venv
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-ENV PYTHONPATH="$VIRTUAL_ENV/lib/python3.12/site-packages"
-
-COPY . .
-
-# Set permissions for entrypoint scripts
-RUN chmod +x /app/docker/django/entrypoint.sh && \
-    chmod +x /app/docker/tasks_app/entrypoint.sh
-
-# Run Django application
-CMD ["/bin/bash", "/app/docker/django/entrypoint.sh"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

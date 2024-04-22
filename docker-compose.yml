@@ -9,14 +9,14 @@ services:
       context: .
       dockerfile: Dockerfile
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     env_file:
       - .env
     environment:
       - DJANGO_SETTINGS_MODULE=core.settings
-    entrypoint: ['/app/docker/django/entrypoint.sh']
-    expose:
-      - '8000'
+    volumes:
+      - .:/app
     ports:
       - '8000:8000'
 
@@ -30,25 +30,23 @@ services:
       - .env
     environment:
       - DJANGO_SETTINGS_MODULE=core.settings
-    entrypoint: ['/app/docker/tasks_app/entrypoint.sh']
+    command: ['python', 'run.py']
 
   db:
-    image: mysql:8
+    image: mysql:8.3.0
+    user: mysql
     container_name: dlp_db
     restart: always
     volumes:
-      - /tmp/app/mysqld:/var/run/mysqld
-      - ./db:/var/lib/mysql
-      - ./init.sql:/app/init.sql
-    command: --init-file /app/init.sql
+      - db_data:/var/lib/mysql
     env_file:
       - .env
     ports:
       - '3307:3306'
     healthcheck:
       test: ["CMD", "mysql", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}", "-e", "SELECT 1"]
-      timeout: 20s
+      timeout: 5s
       retries: 10
 
 volumes:
-  db:
+  db_data:

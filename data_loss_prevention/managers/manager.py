@@ -5,7 +5,6 @@ import json
 class Manager:
 
     def __init__(self, queue_name: str, tasks: dict):
-        self.loop = asyncio.get_event_loop()
         self.queue = queue_name
         self.tasks = tasks
 
@@ -33,5 +32,5 @@ class Manager:
                 kwargs = body.get("kwargs", {})
 
                 task = self.tasks.get(task_name)
-                self.loop.create_task(task(*args, **kwargs))
+                asyncio.create_task(task(*args, **kwargs))
             await asyncio.sleep(1)
